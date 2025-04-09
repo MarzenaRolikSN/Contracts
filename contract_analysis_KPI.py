@@ -497,70 +497,74 @@ if uploaded_file is not None:
     except:
         st.subheader("Not enought data to display the analysis")
 
-    col1, col2, col3 = st.columns(3)
+    try:
+
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric(f"Value Eligible for Price Increase This Year ({target_currency})", f"{pi_value_year:,.2f}")
+        
+        with col2:
+            st.metric(f"Value Eligible for Price Increase Next 3 Months ({target_currency})", f"{pi_value_3m:,.2f}")
+        
+        with col3:
+            st.metric(f"Value Eligible for Price Increase Next 6 Months ({target_currency})", f"{pi_value_6m:,.2f}")
+        
+        # Top contracts with price increase opportunities
+        # with st.expander(f"Top Contracts with Price Increase Opportunities This Year ({target_currency})"):
+        top_pi_year = price_increase_year.dropna(subset=['AnnualSalesValue_Converted']).sort_values('AnnualSalesValue_Converted', ascending=False).head(20)
+        
+        fig = px.bar(
+            top_pi_year,
+            x='Contract_Description__c', 
+            y='AnnualSalesValue_Converted',
+            title=f'Top 20 Contracts with Price Increase Opportunities This Year ({target_currency})',
+            labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+            hover_data=['ContractNumber', 'ContractCountry__c', 'Price_Increase_Opportunity_Date__c']
+        )
+        st.plotly_chart(fig)
+        
+        # KPI 7: Annual Sales Value Distribution
+        # st.subheader(f"Annual Sales Value Distribution ({target_currency})")
+        
+        # # Create histogram of annual sales values
+        # fig = px.histogram(
+        #     filtered_df.dropna(subset=['AnnualSalesValue_Converted']),
+        #     x='AnnualSalesValue_Converted',
+        #     nbins=50,
+        #     title=f'Distribution of Annual Sales Values ({target_currency})',
+        #     labels={'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+        #     marginal='box'
+        # )
+        # st.plotly_chart(fig)
+        
+        # Annual sales value by region
+        sales_by_region = filtered_df.groupby('ContractRegion__c')['AnnualSalesValue_Converted'].sum().reset_index()
+        sales_by_region = sales_by_region.sort_values('AnnualSalesValue_Converted', ascending=False)
+        
+        fig = px.pie(
+            sales_by_region,
+            values='AnnualSalesValue_Converted',
+            names='ContractRegion__c',
+            title=f'Annual Sales Value by Cluster ({target_currency})'
+        )
+        st.plotly_chart(fig)
+        
+        # Annual sales value by contract type
+        sales_by_type = filtered_df.groupby('EMEA_Type_of_contract__c')['AnnualSalesValue_Converted'].sum().reset_index()
+        sales_by_type = sales_by_type.sort_values('AnnualSalesValue_Converted', ascending=False)
+        
+        fig = px.bar(
+            sales_by_type,
+            y='AnnualSalesValue_Converted',
+            x='EMEA_Type_of_contract__c',  # Reversed axes for better readability
+            title=f'Annual Sales Value by Contract Type ({target_currency})',
+            labels={'EMEA_Type_of_contract__c': 'Contract Type', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'}
+        )
+        st.plotly_chart(fig)
     
-    with col1:
-        st.metric(f"Value Eligible for Price Increase This Year ({target_currency})", f"{pi_value_year:,.2f}")
-    
-    with col2:
-        st.metric(f"Value Eligible for Price Increase Next 3 Months ({target_currency})", f"{pi_value_3m:,.2f}")
-    
-    with col3:
-        st.metric(f"Value Eligible for Price Increase Next 6 Months ({target_currency})", f"{pi_value_6m:,.2f}")
-    
-    # Top contracts with price increase opportunities
-    # with st.expander(f"Top Contracts with Price Increase Opportunities This Year ({target_currency})"):
-    top_pi_year = price_increase_year.dropna(subset=['AnnualSalesValue_Converted']).sort_values('AnnualSalesValue_Converted', ascending=False).head(20)
-    
-    fig = px.bar(
-        top_pi_year,
-        x='Contract_Description__c', 
-        y='AnnualSalesValue_Converted',
-        title=f'Top 20 Contracts with Price Increase Opportunities This Year ({target_currency})',
-        labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-        hover_data=['ContractNumber', 'ContractCountry__c', 'Price_Increase_Opportunity_Date__c']
-    )
-    st.plotly_chart(fig)
-    
-    # KPI 7: Annual Sales Value Distribution
-    # st.subheader(f"Annual Sales Value Distribution ({target_currency})")
-    
-    # # Create histogram of annual sales values
-    # fig = px.histogram(
-    #     filtered_df.dropna(subset=['AnnualSalesValue_Converted']),
-    #     x='AnnualSalesValue_Converted',
-    #     nbins=50,
-    #     title=f'Distribution of Annual Sales Values ({target_currency})',
-    #     labels={'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-    #     marginal='box'
-    # )
-    # st.plotly_chart(fig)
-    
-    # Annual sales value by region
-    sales_by_region = filtered_df.groupby('ContractRegion__c')['AnnualSalesValue_Converted'].sum().reset_index()
-    sales_by_region = sales_by_region.sort_values('AnnualSalesValue_Converted', ascending=False)
-    
-    fig = px.pie(
-        sales_by_region,
-        values='AnnualSalesValue_Converted',
-        names='ContractRegion__c',
-        title=f'Annual Sales Value by Cluster ({target_currency})'
-    )
-    st.plotly_chart(fig)
-    
-    # Annual sales value by contract type
-    sales_by_type = filtered_df.groupby('EMEA_Type_of_contract__c')['AnnualSalesValue_Converted'].sum().reset_index()
-    sales_by_type = sales_by_type.sort_values('AnnualSalesValue_Converted', ascending=False)
-    
-    fig = px.bar(
-        sales_by_type,
-        y='AnnualSalesValue_Converted',
-        x='EMEA_Type_of_contract__c',  # Reversed axes for better readability
-        title=f'Annual Sales Value by Contract Type ({target_currency})',
-        labels={'EMEA_Type_of_contract__c': 'Contract Type', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'}
-    )
-    st.plotly_chart(fig)
-    
+    except:
+        st.subheader("Not enought data to display the analysis")
     # Data table with key information
     st.subheader("Contract Data Table")
     
