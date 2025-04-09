@@ -165,7 +165,9 @@ if uploaded_file is not None:
     
     # KPI relevant columns
     kpi_columns = ['Status', 'StartDate', 'Contract_End_Date__c', 'AnnualSalesValue__c', 
-                  'ActivatedDate', 'Price_Increase_Opportunity_Date__c', 'EMEA_Notification_Date__c']
+                  'ActivatedDate', 'Price_Increase_Opportunity_Date__c', 'EMEA_Notification_Date__c',
+                  'ConsignmentValue__c','CapitalValue__c'
+                  ]
     
     # Calculate missing values percentage
     missing_values = pd.DataFrame({
