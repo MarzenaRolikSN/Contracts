@@ -134,7 +134,7 @@ if uploaded_file is not None:
     )
     
     regions = st.sidebar.multiselect(
-        "Select Contract Regions",
+        "Select Contract Clusters",
         options=df['ContractRegion__c'].dropna().unique(),
         default=[]
     )
@@ -202,7 +202,7 @@ if uploaded_file is not None:
         st.plotly_chart(fig)
 
     # Calculate missing values by BU
-    st.subheader("Missing Data by Regions")
+    st.subheader("Missing Data by Clusters - no filters applied")
 
     # Create a function to calculate missing percentage for each KPI column by BU
     def calculate_missing_by_reg(dataframe, column_list):
@@ -244,7 +244,7 @@ if uploaded_file is not None:
             color='Missing Percentage',
             facet_col='Region',
             facet_col_wrap=4,  # Adjust based on number of BUs
-            title='Missing Data Percentage in KPI Relevant Columns by Region',
+            title='Missing Data Percentage in KPI Relevant Columns by Cluster',
             color_continuous_scale='YlOrRd',
             labels={'Missing Percentage': '% Missing'},
             height=800  # Adjust based on number of BUs
@@ -256,12 +256,12 @@ if uploaded_file is not None:
             missing_by_bu.pivot(index='Region', columns='Column', values='Missing Percentage'),
             labels=dict(x="Column", y="Region", color="Missing Percentage"),
             color_continuous_scale='YlOrRd',
-            title='Missing Data Heatmap by Region'
+            title='Missing Data Heatmap by Cluster'
         )
         st.plotly_chart(fig2)
         
         # Show table of missing values by BU
-        with st.expander("View Detailed Missing Data by Region"):
+        with st.expander("View Detailed Missing Data by Cluster"):
             st.dataframe(missing_by_bu.sort_values(['Region', 'Missing Percentage'], ascending=[True, False]))
     else:
         st.warning("No region information available to analyze missing data by BU.")
@@ -541,7 +541,7 @@ if uploaded_file is not None:
         sales_by_region,
         values='AnnualSalesValue_Converted',
         names='ContractRegion__c',
-        title=f'Annual Sales Value by Region ({target_currency})'
+        title=f'Annual Sales Value by Cluster ({target_currency})'
     )
     st.plotly_chart(fig)
     
@@ -564,10 +564,12 @@ if uploaded_file is not None:
     # Select relevant columns for the data table
     table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
                     'ContractRegion__c', 'ContractCountry__c', 'EMEA_Type_of_contract__c',
-                    'AnnualSalesValue__c', 'AnnualSalesValue_Converted', 'Price_Increase_Opportunity_Date__c']
+                    'AnnualSalesValue__c', 'AnnualSalesValue_Converted', 'Price_Increase_Opportunity_Date__c',
+                            "Id", 'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c'
+]
     
     # Show the data table with the selected columns
-    st.dataframe(filtered_df[table_columns].sort_values('ContractNumber'))
+    st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
 
 else:
     st.info("Please upload a CSV file to begin the analysis.")
@@ -580,7 +582,8 @@ else:
         "AccountId", "Sold_To_Account_ID__c", "Buying_Group__c", "ContractNumber", "Name", 
         "EMEA_Type_of_contract__c", "BUs_included_in_Contract__c", "ContractRegion__c", 
         "ContractCountry__c", "Status", "StartDate", "Contract_End_Date__c", 
-        "AnnualSalesValue__c", "ActivatedDate", "Price_Increase_Opportunity_Date__c"
+        "AnnualSalesValue__c", "ActivatedDate", "Price_Increase_Opportunity_Date__c", 
+        "ExternalContractID__c",  "Id", 'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c'
     ]
     
     # Display example structure
