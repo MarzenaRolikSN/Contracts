@@ -453,47 +453,50 @@ if uploaded_file is not None:
     
     # KPI 6: Price Increase Opportunity
     st.subheader("Price Increase Opportunities")
-    
-    # Price increase opportunities in different time frames
-    price_increase_year = filtered_df[
-        (filtered_df['Price_Increase_Opportunity_Date__c'].dt.year == today.year) & 
-        (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today)
-    ]
-    
-    price_increase_3m = filtered_df[
-        (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today) & 
-        (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date <= three_months)
-    ]
-    
-    price_increase_6m = filtered_df[
-        (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today) & 
-        (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date <= six_months)
-    ]
-    
-    # Calculate sum of annual sales value for each time frame
-    pi_value_year = price_increase_year['AnnualSalesValue_Converted'].sum()
-    pi_value_3m = price_increase_3m['AnnualSalesValue_Converted'].sum()
-    pi_value_6m = price_increase_6m['AnnualSalesValue_Converted'].sum()
-    
-    # Create a dataframe for visualization
-    price_increase_data = pd.DataFrame({
-        'Time Frame': ['This Year', 'Next 3 Months', 'Next 6 Months'],
-        'Total Value': [pi_value_year, pi_value_3m, pi_value_6m],
-        'Count': [len(price_increase_year), len(price_increase_3m), len(price_increase_6m)]
-    })
-    
-    # Create a bar chart for price increase opportunities (showing value instead of count)
-    fig = px.bar(
-        price_increase_data,
-        y='Time Frame',
-        x='Total Value',
-        title=f'Price Increase Opportunities - Total Value ({target_currency})',
-        color='Total Value',
-        text='Count'  # Show count as text on bars
-    )
-    fig.update_traces(texttemplate='%{text} contracts', textposition='outside')
-    st.plotly_chart(fig)
-    
+
+    try:
+        # Price increase opportunities in different time frames
+        price_increase_year = filtered_df[
+            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.year == today.year) & 
+            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today)
+        ]
+        
+        price_increase_3m = filtered_df[
+            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today) & 
+            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date <= three_months)
+        ]
+        
+        price_increase_6m = filtered_df[
+            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today) & 
+            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date <= six_months)
+        ]
+        
+        # Calculate sum of annual sales value for each time frame
+        pi_value_year = price_increase_year['AnnualSalesValue_Converted'].sum()
+        pi_value_3m = price_increase_3m['AnnualSalesValue_Converted'].sum()
+        pi_value_6m = price_increase_6m['AnnualSalesValue_Converted'].sum()
+        
+        # Create a dataframe for visualization
+        price_increase_data = pd.DataFrame({
+            'Time Frame': ['This Year', 'Next 3 Months', 'Next 6 Months'],
+            'Total Value': [pi_value_year, pi_value_3m, pi_value_6m],
+            'Count': [len(price_increase_year), len(price_increase_3m), len(price_increase_6m)]
+        })
+        
+        # Create a bar chart for price increase opportunities (showing value instead of count)
+        fig = px.bar(
+            price_increase_data,
+            y='Time Frame',
+            x='Total Value',
+            title=f'Price Increase Opportunities - Total Value ({target_currency})',
+            color='Total Value',
+            text='Count'  # Show count as text on bars
+        )
+        fig.update_traces(texttemplate='%{text} contracts', textposition='outside')
+        st.plotly_chart(fig)
+    except:
+        st.subheader("Not enought data to display the analysis")
+
     col1, col2, col3 = st.columns(3)
     
     with col1:
