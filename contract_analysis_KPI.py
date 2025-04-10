@@ -166,7 +166,7 @@ if uploaded_file is not None:
     # KPI relevant columns
     kpi_columns = ['Status', 'StartDate', 'Contract_End_Date__c', 'AnnualSalesValue__c', 
                   'ActivatedDate', 'Price_Increase_Opportunity_Date__c', 'EMEA_Notification_Date__c',
-                  'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c'
+                  'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c','SAP_Deal_Number__c'
                   ]
     
     # Calculate missing values percentage
@@ -572,11 +572,15 @@ if uploaded_file is not None:
     table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
                     'ContractRegion__c', 'ContractCountry__c', 'EMEA_Type_of_contract__c',
                     'AnnualSalesValue__c', 'AnnualSalesValue_Converted', 'Price_Increase_Opportunity_Date__c',
-                            "Id", 'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c'
+                            "Id", 'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c', 
+                            'SAP_Deal_Number__c'
 ]
     
     # Show the data table with the selected columns
-    st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
+    try:
+        st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
+    except:
+        st.dataframe(filtered_df.sort_values('StartDate', ascending=False))
 
 else:
     st.info("Please upload a CSV file to begin the analysis.")
