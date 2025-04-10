@@ -151,10 +151,17 @@ if uploaded_file is not None:
                   'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c','SAP_Deal_Number__c'
                   ]
     
-    kpi_columns = st.sidebar.multiselect(
+    try:
+        kpi_columns = st.sidebar.multiselect(
+            "Select KPI columns",
+            options=df.columns,
+            default=kpi_columns_default
+        )
+    except:
+        kpi_columns = st.sidebar.multiselect(
         "Select KPI columns",
         options=df.columns,
-        default=kpi_columns_default
+        default=[]
     )
     
     # Apply filters
@@ -576,16 +583,23 @@ if uploaded_file is not None:
     st.subheader("Contract Data Table")
     
     # Select relevant columns for the data table
-    table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
-                    'ContractRegion__c', 'ContractCountry__c', 'EMEA_Type_of_contract__c',
-                    'AnnualSalesValue__c', 'AnnualSalesValue_Converted', 'Price_Increase_Opportunity_Date__c',
-                            "Id", 'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c', 
-                            'SAP_Deal_Number__c'
-]
+    fixed_columns = ["Id",'ContractNumber', 'Name', 'ContractRegion__c', 'ContractCountry__c']
+    table_columns = fixed_columns + kpi_columns
+    # "Id",'ContractNumber', 'Name', 'ContractRegion__c', 'ContractCountry__c' + KPI data
+#     table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
+#                     'ContractRegion__c', 'ContractCountry__c', 'EMEA_Type_of_contract__c',
+#                     'AnnualSalesValue__c', 'AnnualSalesValue_Converted', 'Price_Increase_Opportunity_Date__c',
+#                             "Id", 'ConsignmentValue__c','CapitalValue__c', 'TotalProcedureCommitments__c', 
+#                             'SAP_Deal_Number__c'
+# ]
     
     # Show the data table with the selected columns
     try:
-        st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
+        if 'StartDate' in table_columns:
+            st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
+        else:
+            st.dataframe(filtered_df[table_columns].sort_values('ContractNumber', ascending=False))
+
     except:
         st.dataframe(filtered_df.sort_values('StartDate', ascending=False))
 
