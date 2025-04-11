@@ -145,6 +145,17 @@ if uploaded_file is not None:
         default=[]
     )
 
+    statuses = st.sidebar.multiselect(
+        "Select Contract Status",
+        options=df['Status'].dropna().unique(),
+        default=[]
+    )
+
+    volume_agreement = st.sidebar.multiselect(
+        "Volume Based Agreement - Active",
+        options=['Yes','No'],
+        default=['No']
+    )
     # KPI relevant columns
     kpi_columns_default = ['Status', 'StartDate', 'Contract_End_Date__c', 'AnnualSalesValue__c', 
                   'ActivatedDate', 'Price_Increase_Opportunity_Date__c', 'EMEA_Notification_Date__c',
@@ -178,6 +189,16 @@ if uploaded_file is not None:
     
     if countries:
         filtered_df = filtered_df[filtered_df['ContractCountry__c'].isin(countries)]
+    
+    if statuses:
+        filtered_df = filtered_df[filtered_df['Status'].isin(statuses)]
+    try:
+        if 'Yes' in volume_agreement:
+            filtered_df = filtered_df[(filtered_df['Status'].isin(['Active'])) & (filtered_df['EMEA_Type_of_contract__c'].isin(['Usage agreement'])) ]
+            kpi_columns = [ 'AnnualSalesValue__c',  'CapitalValue__c', 'CapitalValueDescription__c', 'ConsignmentValue__c', 'ConsignmentValueDescription__c'
+                    , 'TotalProcedureCommitments__c','QuantityAgreed__c', 'HipProceduresCommitment__c', 'KneeProceduresCommitment__c']
+    except:
+        pass
     
     # Data Quality Analysis
     st.header("Data Quality Analysis")
@@ -216,7 +237,7 @@ if uploaded_file is not None:
         st.plotly_chart(fig)
 
     # Calculate missing values by BU
-    st.subheader("Missing Data by Clusters - no filters applied")
+    st.subheader("Missing Data by Clusters")
 
     # Create a function to calculate missing percentage for each KPI column by BU
     def calculate_missing_by_reg(dataframe, column_list):
@@ -247,12 +268,12 @@ if uploaded_file is not None:
         return pd.DataFrame(result_data)
 
     # Calculate missing values by BU for KPI columns
-    missing_by_bu = calculate_missing_by_reg(df, kpi_columns)
+    missing_by_reg = calculate_missing_by_reg(filtered_df, kpi_columns)
 
-    # Create a heatmap of missing values by BU
-    if not missing_by_bu.empty:
+    # Create a heatmap of missing values by region
+    if not missing_by_reg.empty:
         fig = px.bar(
-            missing_by_bu,
+            missing_by_reg,
             x='Column',
             y='Missing Percentage',
             color='Missing Percentage',
@@ -267,19 +288,105 @@ if uploaded_file is not None:
         
         # Alternative view: heatmap
         fig2 = px.imshow(
-            missing_by_bu.pivot(index='Region', columns='Column', values='Missing Percentage'),
+            missing_by_reg.pivot(index='Region', columns='Column', values='Missing Percentage'),
             labels=dict(x="Column", y="Region", color="Missing Percentage"),
             color_continuous_scale='YlOrRd',
             title='Missing Data Heatmap by Cluster'
         )
         st.plotly_chart(fig2)
         
+
         # Show table of missing values by BU
         with st.expander("View Detailed Missing Data by Cluster"):
-            st.dataframe(missing_by_bu.sort_values(['Region', 'Missing Percentage'], ascending=[True, False]))
+            st.dataframe(missing_by_reg.sort_values(['Region', 'Missing Percentage'], ascending=[True, False]))
     else:
         st.warning("No region information available to analyze missing data by BU.")
 
+    # Calculate missing values by Country
+    st.subheader("Missing Data by Countries")
+
+    def calculate_missing_by_country(dataframe, column_list):
+        # Get all regions
+        countries = dataframe['ContractCountry__c'].dropna().unique()
+        
+        # Create empty dictionary to store results
+        result_data = []
+        
+        # Loop through each BU and calculate missing values for each KPI column
+        for c in countries:
+            country_df = dataframe[dataframe['ContractCountry__c'] == c]
+            country_total = len(country_df)
+            
+            if country_total > 0:  # Avoid division by zero
+                for col in column_list:
+                    if col in country_df.columns:
+                        missing_count = country_df[col].isna().sum()
+                        missing_pct = (missing_count / country_total * 100).round(2)
+                        
+                        result_data.append({
+                            'Country': c,
+                            'Column': col,
+                            'Missing Percentage': missing_pct,
+                            'Total Contracts': country_total
+                        })
+        
+        return pd.DataFrame(result_data)
+
+    # Calculate missing values by BU for KPI columns
+    missing_by_country = calculate_missing_by_country(filtered_df, kpi_columns)
+    if not missing_by_country.empty:
+
+        fig3 = px.imshow(
+            missing_by_country.pivot(index='Column', columns='Country', values='Missing Percentage'),
+            labels=dict(x="Country", y="Column", color="Missing Percentage"),
+            color_continuous_scale='YlOrRd',
+            title='Missing Data Heatmap by Country'
+        )
+        st.plotly_chart(fig3)
+    
+        # Calculate missing values by Country
+    st.subheader("Missing Data by Business Unit")
+
+    def calculate_missing_by_bu(dataframe, column_list):
+        # Get all regions
+        bus = dataframe['BUs_included_in_Contract__c'].dropna().unique()
+        
+        # Create empty dictionary to store results
+        result_data = []
+        
+        # Loop through each BU and calculate missing values for each KPI column
+        for bu in bus:
+            bu_df = dataframe[dataframe['BUs_included_in_Contract__c'] == bu]
+            bu_total = len(bu_df)
+            
+            if bu_total > 0:  # Avoid division by zero
+                for col in column_list:
+                    if col in bu_df.columns:
+                        missing_count = bu_df[col].isna().sum()
+                        missing_pct = (missing_count / bu_total * 100).round(2)
+                        
+                        result_data.append({
+                            'BU': bu,
+                            'Column': col,
+                            'Missing Percentage': missing_pct,
+                            'Total Contracts': bu_total
+                        })
+        
+        return pd.DataFrame(result_data)
+
+    # Calculate missing values by BU for KPI columns
+    missing_by_bu = calculate_missing_by_bu(filtered_df, kpi_columns)
+    if not missing_by_bu.empty:
+
+        fig4 = px.imshow(
+            missing_by_bu.pivot(index='Column', columns='BU', values='Missing Percentage'),
+            labels=dict(x="BU", y="Column", color="Missing Percentage"),
+            color_continuous_scale='YlOrRd',
+            title='Missing Data Heatmap by Business Unit',
+            width=100000,
+            height=800
+        )
+        st.plotly_chart(fig4)
 
     # Show overall data statistics
     with st.expander("Show Full Data Quality Statistics"):
@@ -595,13 +702,16 @@ if uploaded_file is not None:
     
     # Show the data table with the selected columns
     try:
+        filtered_df = filtered_df[filtered_df[table_columns].isnull().any(axis=1)]
+
         if 'StartDate' in table_columns:
+            
             st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
         else:
             st.dataframe(filtered_df[table_columns].sort_values('ContractNumber', ascending=False))
 
     except:
-        st.dataframe(filtered_df.sort_values('StartDate', ascending=False))
+        st.dataframe(filtered_df.sort_values('ContractNumber', ascending=False))
 
 else:
     st.info("Please upload a CSV file to begin the analysis.")
