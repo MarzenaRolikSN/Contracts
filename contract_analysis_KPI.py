@@ -203,7 +203,105 @@ if uploaded_file is not None:
     # Data Quality Analysis
     st.header("Data Quality Analysis")
     
-    
+    api_key_to_field_mapping = {
+    "AccountId": "Account Name",
+    "Sold_To_Account_ID__c": "Sold To Account ID",
+    "BUs_included_in_Contract_copy__c": "BUs included in Contract copy",
+    "Buying_Group__c": "Buying Group",
+    "Sold_To_Id__c": "Sold To Id",
+    "ContractNumber": "Contract Number",
+    "Name": "Contract Name",
+    "EMEA_Type_of_contract__c": "Type of Contract",
+    "MainBU__c": "MainBU",
+    "AdditionalBu__c": "AdditionalBu",
+    "BUSinglePicklistValue__c": "BUSinglePicklistValue",
+    "BUs_included_in_Contract__c": "BUs included in Contract",
+    "Sub_BUs__c": "Sub BUs",
+    "ContractRegion__c": "Contract Region",
+    "ContractCountry__c": "Contract Country",
+    "Old_contract_number__c": "Old contract number",
+    "SAP_Deal_Number__c": "SAP Deal Number",
+    "Parent_contract__c": "Parent Contract",
+    "Contract_Description__c": "Contract Description",
+    "Document_Link__c": "Document Link",
+    "Billing_City__c": "Billing City",
+    "EMEA_Bonus_contract__c": "Bonus Contract",
+    "Band__c": "Band",
+    "EMEA_Condition_type__c": "Condition Type",
+    "Price_Conditions__c": "Price Conditions",
+    "Terms_of_Payment__c": "Terms of Payment",
+    "CustomerSignedDate": "Customer Signed Date",
+    "Status": "Status",
+    "Canceled_Date__c": "Canceled Date",
+    "EMEA_Notification_Date__c": "Notification Date",
+    "StartDate": "Contract Start Date",
+    "Contract_End_Date__c": "Contract End Date",
+    "Contract_Original_End_Date__c": "Contract Original End Date",
+    "Automatic_extension__c": "Automatic Extension",
+    "Zeitpunkt_der_Erinnerung__c": "Internal Notice Period",
+    "Erinnerung_senden_an__c": "Person in Charge",
+    "CustomerSignedId": "Customer Signed By",
+    "Price_Increase_Opportunity_Date__c": "Price Increase Opportunity Date",
+    "Price_Regulations_Notes__c": "Price Regulations Notes",
+    "Notice_Period__c": "Notice Period",
+    "EMEA_Bonus_type__c": "Bonus Type",
+    "EMEA_Expected_Sales__c": "Expected Sales",
+    "ExpectedPayoutPercentage__c": "Expected Payout Percentage",
+    "EMEA_Payout_period__c": "Payout Period",
+    "EMEA_Bonus_beneficiary__c": "Bonus Beneficiary",
+    "EMEA_Bonus_conditions__c": "Bonus Description",
+    "EMEA_Booking_Type__c": "Booking Type",
+    "Rebate_Conditions__c": "Rebate Conditions",
+    "SpecificServiceLevels__c": "Specific Service Levels",
+    "CapitalValue__c": "Capital Value",
+    "CapitalValueDescription__c": "Capital Value Description",
+    "ConsignmentValue__c": "Consignment Value",
+    "ConsignmentValueDescription__c": "Consignment Value Description",
+    "AnnualSalesValue__c": "Annual Sales Value",
+    "MarketShare__c": "Market Share %",
+    "TotalProcedureCommitments__c": "Total Procedure Commitments",
+    "QuantityAgreed__c": "Quantity Agreed",
+    "HipProceduresCommitment__c": "Hip Procedures Commitment",
+    "KneeProceduresCommitment__c": "Knee Procedures Commitment",
+    "Kits__c": "Kits",
+  "Canister__c": "Canister",
+  "EMEA_Volume_annually__c": "Volume annually",
+  "Inkludierte_Gerte__c": "Inkludierte Geräte",
+  "Ambulante_Erstattung__c": "Ambulante Erstattung",
+  "Therapy_days__c": "Therapy days",
+  "Costs_per_Therapy_day__c": "Costs per Therapy day",
+  "Flat_rate_month__c": "Flat rate (month)",
+  "More_included_items__c": "More included items",
+  # System Information
+  "ActivatedById": "Activated By",
+  "CreatedById": "Created By",
+  "CurrencyIsoCode": "Contract Currency",
+  "ActivatedDate": "Activated Date",
+  "LastModifiedById": "Last Modified By",
+  "OwnerId": "Contract Owner"
+
+    }
+
+    def rename_columns(df, mapping):
+    # Create a new dictionary for renaming columns
+        rename_dict = {col: mapping.get(col, col) for col in df.columns}
+
+    # Rename the columns using the dictionary
+        df.rename(columns=rename_dict, inplace=True)
+
+    # Rename the columns in the DataFrame
+    rename_columns(filtered_df, api_key_to_field_mapping)
+
+
+    def rename_kpi_columns(kpi_columns, mapping):
+    # Rename the KPI columns using the mapping
+        renamed_kpi_columns = [mapping.get(col, col) for col in kpi_columns]
+        return renamed_kpi_columns
+
+
+    # Rename the KPI columns
+    kpi_columns = rename_kpi_columns(kpi_columns, api_key_to_field_mapping)
+
     # Calculate missing values percentage
     missing_values = pd.DataFrame({
         'Column': filtered_df.columns,
@@ -242,14 +340,14 @@ if uploaded_file is not None:
     # Create a function to calculate missing percentage for each KPI column by BU
     def calculate_missing_by_reg(dataframe, column_list):
         # Get all regions
-        regions = dataframe['ContractRegion__c'].dropna().unique()
+        regions = dataframe['Contract Region'].dropna().unique()
         
         # Create empty dictionary to store results
         result_data = []
         
         # Loop through each BU and calculate missing values for each KPI column
         for r in regions:
-            reg_df = dataframe[dataframe['ContractRegion__c'] == r]
+            reg_df = dataframe[dataframe['Contract Region'] == r]
             region_total = len(reg_df)
             
             if region_total > 0:  # Avoid division by zero
@@ -307,14 +405,14 @@ if uploaded_file is not None:
 
     def calculate_missing_by_country(dataframe, column_list):
         # Get all regions
-        countries = dataframe['ContractCountry__c'].dropna().unique()
+        countries = dataframe['Contract Country'].dropna().unique()
         
         # Create empty dictionary to store results
         result_data = []
         
         # Loop through each BU and calculate missing values for each KPI column
         for c in countries:
-            country_df = dataframe[dataframe['ContractCountry__c'] == c]
+            country_df = dataframe[dataframe['Contract Country'] == c]
             country_total = len(country_df)
             
             if country_total > 0:  # Avoid division by zero
@@ -349,14 +447,14 @@ if uploaded_file is not None:
 
     def calculate_missing_by_bu(dataframe, column_list):
         # Get all regions
-        bus = dataframe['BUs_included_in_Contract__c'].dropna().unique()
+        bus = dataframe['BUs included in Contract'].dropna().unique()
         
         # Create empty dictionary to store results
         result_data = []
         
         # Loop through each BU and calculate missing values for each KPI column
         for bu in bus:
-            bu_df = dataframe[dataframe['BUs_included_in_Contract__c'] == bu]
+            bu_df = dataframe[dataframe['BUs included in Contract'] == bu]
             bu_total = len(bu_df)
             
             if bu_total > 0:  # Avoid division by zero
@@ -419,11 +517,11 @@ if uploaded_file is not None:
     # Create a horizontal bar chart for top contracts
     fig = px.bar(
         top_contracts,
-        x='Contract_Description__c', 
+        x='Contract Description', 
         y='AnnualSalesValue_Converted',
         title=f'Top 20 Contracts by Annual Sales Value ({target_currency})',
-        labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-        hover_data=['ContractNumber', 'ContractCountry__c', 'EMEA_Type_of_contract__c']
+        labels={'Contract Description': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+        hover_data=['Contract Number', 'Contract Country', 'Type of Contract']
     )
     st.plotly_chart(fig)
     
@@ -431,10 +529,10 @@ if uploaded_file is not None:
     st.subheader("Contracts Activated per Month")
     
     # Filter contracts with activation date
-    contracts_with_activation = filtered_df.dropna(subset=['ActivatedDate'])
+    contracts_with_activation = filtered_df.dropna(subset=['Activated Date'])
     
     # Extract year and month from activation date
-    contracts_with_activation['ActivationMonth'] = contracts_with_activation['ActivatedDate'].dt.to_period('M')
+    contracts_with_activation['ActivationMonth'] = contracts_with_activation['Activated Date'].dt.to_period('M')
     
     # Count contracts activated per month
     activations_per_month = contracts_with_activation.groupby('ActivationMonth').size().reset_index(name='Count')
@@ -457,11 +555,11 @@ if uploaded_file is not None:
     
     fig = px.bar(
         top_activated,
-        x='Contract_Description__c', 
+        x='Contract Description', 
         y='AnnualSalesValue_Converted',
         title=f'Top 20 Activated Contracts by Annual Sales Value ({target_currency})',
-        labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-        hover_data=['ContractNumber', 'ContractCountry__c', 'EMEA_Type_of_contract__c', 'ActivatedDate']
+        labels={'Contract Description': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+        hover_data=['Contract Number', 'Contract Country', 'Type of Contract', 'Activated Date']
     )
     st.plotly_chart(fig)
     
@@ -470,7 +568,7 @@ if uploaded_file is not None:
     
     # Find contracts with notification date but no activation date or with status not activated
     sent_not_activated = filtered_df[
-        (filtered_df['EMEA_Notification_Date__c'].notna()) & 
+        (filtered_df['Notification Date'].notna()) & 
         ( (filtered_df['Status'] != 'Active'))
     ]
     
@@ -488,11 +586,11 @@ if uploaded_file is not None:
     
     fig = px.bar(
         top_sent_not_activated,
-        x='Contract_Description__c',  
+        x='Contract Description',  
         y='AnnualSalesValue_Converted',
         title=f'Top 20 Contracts Sent but Not Activated by Annual Sales Value ({target_currency})',
-        labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-        hover_data=['ContractNumber', 'ContractCountry__c', 'EMEA_Type_of_contract__c', 'EMEA_Notification_Date__c']
+        labels={'Contract Description': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+        hover_data=['Contract Number', 'Contract Country', 'Type of Contract', 'Notification Date']
     )
     st.plotly_chart(fig)
     
@@ -504,26 +602,26 @@ if uploaded_file is not None:
     
     # Calculate expiration dates
     expiring_this_year = filtered_df[
-        (filtered_df['Contract_End_Date__c'].dt.year == today.year) & 
-        (filtered_df['Contract_End_Date__c'].dt.date >= today)
+        (filtered_df['Contract End Date'].dt.year == today.year) & 
+        (filtered_df['Contract End Date'].dt.date >= today)
     ]
     
     three_months = today + timedelta(days=90)
     expiring_next_3months = filtered_df[
-        (filtered_df['Contract_End_Date__c'].dt.date >= today) & 
-        (filtered_df['Contract_End_Date__c'].dt.date <= three_months)
+        (filtered_df['Contract End Date'].dt.date >= today) & 
+        (filtered_df['Contract End Date'].dt.date <= three_months)
     ]
     
     six_months = today + timedelta(days=180)
     expiring_next_6months = filtered_df[
-        (filtered_df['Contract_End_Date__c'].dt.date >= today) & 
-        (filtered_df['Contract_End_Date__c'].dt.date <= six_months)
+        (filtered_df['Contract End Date'].dt.date >= today) & 
+        (filtered_df['Contract End Date'].dt.date <= six_months)
     ]
     
     # Define "not followed up" as those without notification date
-    not_followed_year = expiring_this_year[expiring_this_year['EMEA_Notification_Date__c'].isna()]
-    not_followed_3m = expiring_next_3months[expiring_next_3months['EMEA_Notification_Date__c'].isna()]
-    not_followed_6m = expiring_next_6months[expiring_next_6months['EMEA_Notification_Date__c'].isna()]
+    not_followed_year = expiring_this_year[expiring_this_year['Notification Date'].isna()]
+    not_followed_3m = expiring_next_3months[expiring_next_3months['Notification Date'].isna()]
+    not_followed_6m = expiring_next_6months[expiring_next_6months['Notification Date'].isna()]
     
     # Create a dataframe for visualization
     expiry_data = pd.DataFrame({
@@ -564,11 +662,11 @@ if uploaded_file is not None:
     
     fig = px.bar(
         top_expiring_year,
-        x='Contract_Description__c', 
+        x='Contract Description', 
         y='AnnualSalesValue_Converted',
         title=f'Top 20 Contracts Expiring This Year by Annual Sales Value ({target_currency})',
-        labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-        hover_data=['ContractNumber', 'ContractCountry__c', 'Contract_End_Date__c']
+        labels={'Contract Description': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+        hover_data=['Contract Number', 'Contract Country', 'Contract End Date']
     )
     st.plotly_chart(fig)
     
@@ -578,18 +676,18 @@ if uploaded_file is not None:
     try:
         # Price increase opportunities in different time frames
         price_increase_year = filtered_df[
-            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.year == today.year) & 
-            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today)
+            (filtered_df['Price Increase Opportunity Date'].dt.year == today.year) & 
+            (filtered_df['Price Increase Opportunity Date'].dt.date >= today)
         ]
         
         price_increase_3m = filtered_df[
-            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today) & 
-            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date <= three_months)
+            (filtered_df['Price Increase Opportunity Date'].dt.date >= today) & 
+            (filtered_df['Price Increase Opportunity Date'].dt.date <= three_months)
         ]
         
         price_increase_6m = filtered_df[
-            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date >= today) & 
-            (filtered_df['Price_Increase_Opportunity_Date__c'].dt.date <= six_months)
+            (filtered_df['Price Increase Opportunity Date'].dt.date >= today) & 
+            (filtered_df['Price Increase Opportunity Date'].dt.date <= six_months)
         ]
         
         # Calculate sum of annual sales value for each time frame
@@ -637,11 +735,11 @@ if uploaded_file is not None:
         
         fig = px.bar(
             top_pi_year,
-            x='Contract_Description__c', 
+            x='Contract Description', 
             y='AnnualSalesValue_Converted',
             title=f'Top 20 Contracts with Price Increase Opportunities This Year ({target_currency})',
-            labels={'Contract_Description__c': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
-            hover_data=['ContractNumber', 'ContractCountry__c', 'Price_Increase_Opportunity_Date__c']
+            labels={'Contract Description': 'Contract Name', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'},
+            hover_data=['Contract Number', 'Contract Country', 'Price Increase Opportunity Date']
         )
         st.plotly_chart(fig)
         
@@ -660,27 +758,27 @@ if uploaded_file is not None:
         # st.plotly_chart(fig)
         
         # Annual sales value by region
-        sales_by_region = filtered_df.groupby('ContractRegion__c')['AnnualSalesValue_Converted'].sum().reset_index()
+        sales_by_region = filtered_df.groupby('Contract Region')['AnnualSalesValue_Converted'].sum().reset_index()
         sales_by_region = sales_by_region.sort_values('AnnualSalesValue_Converted', ascending=False)
         
         fig = px.pie(
             sales_by_region,
             values='AnnualSalesValue_Converted',
-            names='ContractRegion__c',
+            names='Contract Region',
             title=f'Annual Sales Value by Cluster ({target_currency})'
         )
         st.plotly_chart(fig)
         
         # Annual sales value by contract type
-        sales_by_type = filtered_df.groupby('EMEA_Type_of_contract__c')['AnnualSalesValue_Converted'].sum().reset_index()
+        sales_by_type = filtered_df.groupby('Type of Contract')['AnnualSalesValue_Converted'].sum().reset_index()
         sales_by_type = sales_by_type.sort_values('AnnualSalesValue_Converted', ascending=False)
         
         fig = px.bar(
             sales_by_type,
             y='AnnualSalesValue_Converted',
-            x='EMEA_Type_of_contract__c',  # Reversed axes for better readability
+            x='Type of Contract',  # Reversed axes for better readability
             title=f'Annual Sales Value by Contract Type ({target_currency})',
-            labels={'EMEA_Type_of_contract__c': 'Contract Type', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'}
+            labels={'Type of Contract': 'Contract Type', 'AnnualSalesValue_Converted': f'Annual Sales Value ({target_currency})'}
         )
         st.plotly_chart(fig)
     
@@ -690,7 +788,7 @@ if uploaded_file is not None:
     st.subheader("Contract Data Table")
     
     # Select relevant columns for the data table
-    fixed_columns = ["Id",'ContractNumber', 'Name', 'ContractRegion__c', 'ContractCountry__c']
+    fixed_columns = ["Id",'Contract Number', 'Name', 'Contract Region', 'Contract Country']
     table_columns = fixed_columns + kpi_columns
     # "Id",'ContractNumber', 'Name', 'ContractRegion__c', 'ContractCountry__c' + KPI data
 #     table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
@@ -708,10 +806,10 @@ if uploaded_file is not None:
             
             st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
         else:
-            st.dataframe(filtered_df[table_columns].sort_values('ContractNumber', ascending=False))
+            st.dataframe(filtered_df[table_columns].sort_values('Contract Number', ascending=False))
 
     except:
-        st.dataframe(filtered_df.sort_values('ContractNumber', ascending=False))
+        st.dataframe(filtered_df.sort_values('Contract Number', ascending=False))
 
 else:
     st.info("Please upload a CSV file to begin the analysis.")
