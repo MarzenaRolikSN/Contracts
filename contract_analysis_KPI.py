@@ -788,7 +788,7 @@ if uploaded_file is not None:
     st.subheader("Contract Data Table")
     
     # Select relevant columns for the data table
-    fixed_columns = ["Id",'Contract Number', 'Name', 'Contract Region', 'Contract Country']
+    fixed_columns = ["Id",'Contract Number', 'Contract Name', 'Contract Region', 'Contract Country']
     table_columns = fixed_columns + kpi_columns
     # "Id",'ContractNumber', 'Name', 'ContractRegion__c', 'ContractCountry__c' + KPI data
 #     table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
