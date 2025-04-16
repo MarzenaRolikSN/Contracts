@@ -221,17 +221,24 @@ if uploaded_file is not None:
     st.sidebar.header("Filters")
     
     # Create filters for the specified columns
-    contract_types = st.sidebar.multiselect(
-        "Select Contract Types",
-        options=df['Type of Contract'].dropna().unique(),
-        default=[]
-    )
-    
-    bus_included = st.sidebar.multiselect(
-        "Select BUs included in Contract",
-        options=df['BUs included in Contract'].dropna().unique(),
-        default=[]
-    )
+    try:
+        contract_types = st.sidebar.multiselect(
+            "Select Contract Types",
+            options=df['Type of Contract'].dropna().unique(),
+            default=[]
+        )
+    except:
+        contract_types = []
+
+    try:
+        bus_included = st.sidebar.multiselect(
+            "Select BUs included in Contract",
+            options=df['BUs included in Contract'].dropna().unique(),
+            default=[]
+        )
+    except:
+        bus_included = []
+
     try:
         regions = st.sidebar.multiselect(
             "Select Contract Clusters",
@@ -250,11 +257,14 @@ if uploaded_file is not None:
     except:
         countries = []
 
-    statuses = st.sidebar.multiselect(
-        "Select Contract Status",
-        options=df['Status'].dropna().unique(),
-        default=[]
-    )
+    try:
+        statuses = st.sidebar.multiselect(
+            "Select Contract Status",
+            options=df['Status'].dropna().unique(),
+            default=[]
+        )
+    except:
+        statuses = []
 
     volume_agreement = st.sidebar.multiselect(
         "Volume Based Agreement - Active",
