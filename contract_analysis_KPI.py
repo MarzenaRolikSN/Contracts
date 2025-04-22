@@ -811,11 +811,12 @@ if uploaded_file is not None:
         
         except:
             st.subheader("Not enought data to display the analysis")
-        # Data table with key information
-        st.subheader("Contract Data Table")
 
     except:
         pass
+
+    # Data table with key information
+    st.subheader("Contract Data Table")
 
     # Select relevant columns for the data table
     fixed_columns = ["Id",'Contract Number', 'Contract Name', 'Contract Region', 'Contract Country']
