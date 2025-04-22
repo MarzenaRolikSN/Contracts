@@ -537,7 +537,6 @@ if uploaded_file is not None:
     try:
             
         # KPI 2: Top 20 contracts per annual sales value
-        st.subheader(f"Top 20 Contracts per Annual Sales Value ({target_currency})")
         
         # Sort by annual sales value and get top 20
         top_contracts = filtered_df.dropna(subset=['AnnualSalesValue_Converted']).sort_values('AnnualSalesValue_Converted', ascending=False).head(20)
@@ -552,29 +551,29 @@ if uploaded_file is not None:
             hover_data=['Contract Number', 'Contract Country', 'Type of Contract']
         )
         st.plotly_chart(fig)
-        
-        # KPI 3: Contracts activated per month
-        st.subheader("Contracts Activated per Month")
-        
+
         # Filter contracts with activation date
-        contracts_with_activation = filtered_df.dropna(subset=['Activated Date'])
-        
-        # Extract year and month from activation date
-        contracts_with_activation['ActivationMonth'] = contracts_with_activation['Activated Date'].dt.to_period('M')
-        
-        # Count contracts activated per month
-        activations_per_month = contracts_with_activation.groupby('ActivationMonth').size().reset_index(name='Count')
-        activations_per_month['ActivationMonth'] = activations_per_month['ActivationMonth'].astype(str)
-        
-        # Create a line chart for activations per month
-        fig = px.line(
-            activations_per_month,
-            x='ActivationMonth',
-            y='Count',
-            title='Contracts Activated per Month',
-            markers=True
-        )
-        st.plotly_chart(fig)
+        contracts_with_activation = filtered_df.dropna(subset=['Activated Date'])        
+        if len(contracts_with_activation)>0:
+
+            # KPI 3: Contracts activated per month
+            
+            # Extract year and month from activation date
+            contracts_with_activation['ActivationMonth'] = contracts_with_activation['Activated Date'].dt.to_period('M')
+            
+            # Count contracts activated per month
+            activations_per_month = contracts_with_activation.groupby('ActivationMonth').size().reset_index(name='Count')
+            activations_per_month['ActivationMonth'] = activations_per_month['ActivationMonth'].astype(str)
+            
+            # Create a line chart for activations per month
+            fig = px.line(
+                activations_per_month,
+                x='ActivationMonth',
+                y='Count',
+                title='Contracts Activated per Month',
+                markers=True
+            )
+            st.plotly_chart(fig)
         
         # Top 20 activated contracts per annual sales value
         st.subheader(f"Top 20 Activated Contracts per Annual Sales Value ({target_currency})")
