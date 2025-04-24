@@ -16,6 +16,7 @@ st.sidebar.header("Upload Data")
 uploaded_file = st.sidebar.file_uploader("Upload Contract Data CSV", type=["csv"])
 
 api_key_to_field_mapping = {
+"Id": "Contract ID",
 "AccountId": "Account Name",
 "Sold_To_Account_ID__c": "Sold To Account ID",
 "BUs_included_in_Contract_copy__c": "BUs included in Contract copy",
@@ -273,7 +274,7 @@ if uploaded_file is not None:
     )
     # KPI relevant columns
     kpi_columns_default = ['Status', 'Contract Start Date', 'Contract End Date', 'Annual Sales Value', 
-                  'Activated Date', 'Price Increase Opportunity Date', 'Notification Date',
+                   'Price Increase Opportunity Date', 
                   'Consignment Value','Capital Value', 'Total Procedure Commitments','SAP Deal Number'
                   ]
     
@@ -819,7 +820,7 @@ if uploaded_file is not None:
     st.subheader("Contract Data Table")
 
     # Select relevant columns for the data table
-    fixed_columns = ["Id",'Contract Number', 'Contract Name', 'Contract Region', 'Contract Country']
+    fixed_columns = ["Contract Id",'Contract Number', 'Contract Name', 'Contract Region', 'Contract Country']
     table_columns = fixed_columns + kpi_columns
     # "Id",'ContractNumber', 'Name', 'ContractRegion__c', 'ContractCountry__c' + KPI data
 #     table_columns = ['ContractNumber', 'Name', 'Status', 'StartDate', 'Contract_End_Date__c', 
@@ -836,12 +837,24 @@ if uploaded_file is not None:
         if 'StartDate' in table_columns:
             
             st.dataframe(filtered_df[table_columns].sort_values('StartDate', ascending=False))
+            filtered_df = filtered_df[table_columns].sort_values('StartDate', ascending=False)
         else:
             st.dataframe(filtered_df[table_columns].sort_values('Contract Number', ascending=False))
+            filtered_df = filtered_df[table_columns].sort_values('Contract Number', ascending=False)
 
     except:
         st.dataframe(filtered_df.sort_values('Contract Number', ascending=False))
+        filtered_df = filtered_df.sort_values('Contract Number', ascending=False)
 
+    csv = filtered_df.to_csv(index=False, sep=';').encode('utf-8')
+
+    # Download button for the custom CSV
+    st.download_button(
+        label="Download CSV (semicolon separated)",
+        data=csv,
+        file_name='data_semicolon.csv',
+        mime='text/csv'
+    )
 else:
     st.info("Please upload a CSV file to begin the analysis.")
     
