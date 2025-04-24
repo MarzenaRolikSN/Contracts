@@ -852,7 +852,7 @@ if uploaded_file is not None:
     st.download_button(
         label="Download CSV (semicolon separated)",
         data=csv,
-        file_name='data_semicolon.csv',
+        file_name='contracts_missingdata_export.csv',
         mime='text/csv'
     )
 else:
